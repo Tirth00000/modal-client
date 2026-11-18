@@ -135,7 +135,9 @@ class RetryManager:
             raise ValueError(f"Cannot compute retry delay. attempt_count must be at least 1, but was {attempt_count}")
         delay_ms = retry_policy.initial_delay_ms * (retry_policy.backoff_coefficient ** (attempt_count - 1))
         if delay_ms < MIN_INPUT_RETRY_DELAY_MS:
-            return MIN_INPUT_RETRY_DELAY_MS
+            delay_ms = MIN_INPUT_RETRY_DELAY_MS
         if delay_ms > MAX_INPUT_RETRY_DELAY_MS:
-            return MAX_INPUT_RETRY_DELAY_MS
+            delay_ms = MAX_INPUT_RETRY_DELAY_MS
+        if retry_policy.max_delay_ms:
+            delay_ms = min(delay_ms, retry_policy.max_delay_ms)
         return delay_ms
