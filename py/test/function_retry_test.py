@@ -147,6 +147,16 @@ def test_retry_delay_ms():
     retry_policy = api_pb2.FunctionRetryPolicy(retries=2, backoff_coefficient=3, initial_delay_ms=2000)
     assert RetryManager._retry_delay_ms(2, retry_policy) == 6000
 
+    retry_policy = api_pb2.FunctionRetryPolicy(
+        retries=4, backoff_coefficient=2.0, initial_delay_ms=1000, max_delay_ms=1000
+    )
+    assert [RetryManager._retry_delay_ms(i, retry_policy) for i in range(1, 5)] == [1000] * 4
+
+    retry_policy = api_pb2.FunctionRetryPolicy(
+        retries=5, backoff_coefficient=10.0, initial_delay_ms=60000, max_delay_ms=60000
+    )
+    assert [RetryManager._retry_delay_ms(i, retry_policy) for i in range(1, 6)] == [60000] * 5
+
 
 def test_lost_inputs_retried(client, setup_app_and_function, servicer):
     servicer.sync_client_retries_enabled = True
